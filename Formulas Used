@@ -1,1 +1,38 @@
+Latest date = CALCULATE(MAX(Financials[Month]),ALLSELECTED(Financials))
 
+#Current Month = MONTH([Latest Date])
+
+#Current Year = YEAR([Latest Date])
+
+#Previous Month = VAR _previousmonth = IF([#Current Month]=1,12,[#Current Month]-1) RETURN _previousmonth)
+
+#Previous Year = VAR _previousyear = IF([#Current Month]=1,[#Current Year])-1,Current Year]) RETURN _previousyear)
+
+#CM Assets = VAR _cm = [#Current Month] RETURN CALCULATE(SUM(Financials[Assets]),Financials[Month]= _cm)
+
+#CM Assets = VAR _cm = [#Current Month] VAR _year = [#Current Year] RETURN CALCULATE(SUM(Financials[Assets]),Financials[Month]= _cm, YEAR(Financials[Month]) = _year)
+
+#PM Assets = VAR _cm = [#Previous Month] VAR _year = [#Previous Year] RETURN CALCULATE(SUM(Financials[Assets]),Financials[Month]= _cm, YEAR(Financials[Month]) = _year)
+
+#Assets % Change = DIVIDE(([#CM Assets] - [#PM Assets]),[#PM Assets])
+
+#Sales % Change = DIVIDE(([#CM Sales] - [#PM Sales]),[#Pm Sales])
+
+KPI Measure = {
+    ("Assets", NAMEOF('Financials'[Assets]), 0),
+    ("Liabilities", NAMEOF('Financials'[Liabilities]), 1),
+    ("Current Assets", NAMEOF('Financials'[Current Assets]), 2),
+    ("Current Liabilities", NAMEOF('Financials'[Current Liabilities]), 3),
+    ("Sales", NAMEOF('Financials'[Sales]), 4),
+    ("Taxes", NAMEOF('Financials'[Taxes]), 5)
+}
+
+#Select Measure = 
+SWITCH(VALUES('KPI Measure'[KPI Measure]),
+"Sales", SUM(Financials[Sales]),
+"Taxes", SUM(Financials[Taxes]),
+"Assets",SUM(Financials[Assets]),
+"Current Assets",SUM(Financials[Current Assets]),
+"Current Liabilities",SUM(Financials[Current Liabilities]))
+
+#Running Sum = CALCULATE([#Selected Measure],ALLSELECTED(Financials),Financials[Month] <= MAX(Financials[Month])
